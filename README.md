@@ -10,13 +10,11 @@
 ## How to use
 
 ```bash
-package controller
+package gin_crud
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/zubroide/gorm-crud/common"
-	"github.com/zubroide/gorm-crud/repository"
-	"github.com/zubroide/gorm-crud/service"
+	"github.com/zubroide/gorm-crud"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -24,20 +22,20 @@ import (
 
 
 type ParametersHydratorInterface interface {
-	Hydrate(context *gin.Context) (repository.ListParametersInterface, error)
+	Hydrate(context *gin.Context) (gorm_crud.ListParametersInterface, error)
 }
 
 type BaseParametersHydrator struct {
-	logger common.LoggerInterface
+	logger gorm_crud.LoggerInterface
 	ParametersHydratorInterface
 }
 
-func NewBaseParametersHydrator(logger common.LoggerInterface) ParametersHydratorInterface {
+func NewBaseParametersHydrator(logger gorm_crud.LoggerInterface) ParametersHydratorInterface {
 	return &BaseParametersHydrator{logger: logger}
 }
 
-func (c BaseParametersHydrator) Hydrate(context *gin.Context) (repository.ListParametersInterface, error) {
-	var parameters repository.CrudListParameters
+func (c BaseParametersHydrator) Hydrate(context *gin.Context) (gorm_crud.ListParametersInterface, error) {
+	var parameters gorm_crud.CrudListParameters
 	err := context.ShouldBindQuery(&parameters)
 	return &parameters, err
 }
@@ -55,11 +53,11 @@ type CrudControllerInterface interface {
 type CrudController struct {
 	CrudControllerInterface
 	*BaseController
-	service service.CrudServiceInterface
+	service            gorm_crud.CrudServiceInterface
 	parametersHydrator ParametersHydratorInterface
 }
 
-func NewCrudController(service service.CrudServiceInterface, parametersHydrator ParametersHydratorInterface, logger common.LoggerInterface) *CrudController {
+func NewCrudController(service gorm_crud.CrudServiceInterface, parametersHydrator ParametersHydratorInterface, logger gorm_crud.LoggerInterface) *CrudController {
 	controller := NewBaseController(logger)
 	return &CrudController{BaseController: controller, service: service, parametersHydrator: parametersHydrator}
 }
