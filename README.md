@@ -9,7 +9,7 @@
 
 ## How to use
 
-```bash
+```go
 package gin_crud
 
 import (
