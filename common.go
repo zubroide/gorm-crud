@@ -1,4 +1,4 @@
-package entity
+package gorm_crud
 
 type InterfaceEntity interface {
 }

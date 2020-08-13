@@ -1,11 +1,9 @@
-package repository
+package gorm_crud
 
 import (
 	"database/sql"
 	"fmt"
 	"github.com/jinzhu/gorm"
-	"github.com/zubroide/gorm-crud/common"
-	"github.com/zubroide/gorm-crud/entity"
 	"reflect"
 	"strconv"
 	"strings"
@@ -33,11 +31,11 @@ type ListQueryBuilderInterface interface {
 
 type BaseListQueryBuilder struct {
 	db     *gorm.DB
-	logger common.LoggerInterface
+	logger LoggerInterface
 	ListQueryBuilderInterface
 }
 
-func NewBaseListQueryBuilder(db *gorm.DB, logger common.LoggerInterface) ListQueryBuilderInterface {
+func NewBaseListQueryBuilder(db *gorm.DB, logger LoggerInterface) ListQueryBuilderInterface {
 	return &BaseListQueryBuilder{db: db, logger: logger}
 }
 
@@ -112,25 +110,25 @@ func (c BaseListQueryBuilder) ListQuery(parameters ListParametersInterface) (*go
 
 type CrudRepositoryInterface interface {
 	BaseRepositoryInterface
-	GetModel() entity.InterfaceEntity
-	Find(id uint) (entity.InterfaceEntity, error)
+	GetModel() InterfaceEntity
+	Find(id uint) (InterfaceEntity, error)
 	PluckBy(fieldNames []string) (map[string]int64, error)
-	ListAll() ([]entity.InterfaceEntity, error)
-	List(parameters ListParametersInterface) ([]entity.InterfaceEntity, error)
-	Create(item entity.InterfaceEntity) entity.InterfaceEntity
-	CreateOrUpdateMany(item entity.InterfaceEntity, columns []string, values []map[string]interface{}, onConflict string) error
-	Update(item entity.InterfaceEntity) entity.InterfaceEntity
+	ListAll() ([]InterfaceEntity, error)
+	List(parameters ListParametersInterface) ([]InterfaceEntity, error)
+	Create(item InterfaceEntity) InterfaceEntity
+	CreateOrUpdateMany(item InterfaceEntity, columns []string, values []map[string]interface{}, onConflict string) error
+	Update(item InterfaceEntity) InterfaceEntity
 	Delete(id uint) error
 }
 
 type CrudRepository struct {
 	CrudRepositoryInterface
 	*BaseRepository
-	model            entity.InterfaceEntity // Dynamic typing
+	model            InterfaceEntity // Dynamic typing
 	listQueryBuilder ListQueryBuilderInterface
 }
 
-func NewCrudRepository(db *gorm.DB, model entity.InterfaceEntity, listQueryBuilder ListQueryBuilderInterface, logger common.LoggerInterface) CrudRepositoryInterface {
+func NewCrudRepository(db *gorm.DB, model InterfaceEntity, listQueryBuilder ListQueryBuilderInterface, logger LoggerInterface) CrudRepositoryInterface {
 	repo := NewBaseRepository(db, logger).(*BaseRepository)
 	return &CrudRepository{
 		BaseRepository:   repo,
@@ -139,11 +137,11 @@ func NewCrudRepository(db *gorm.DB, model entity.InterfaceEntity, listQueryBuild
 	}
 }
 
-func (c CrudRepository) GetModel() entity.InterfaceEntity {
+func (c CrudRepository) GetModel() InterfaceEntity {
 	return c.model
 }
 
-func (c CrudRepository) Find(id uint) (entity.InterfaceEntity, error) {
+func (c CrudRepository) Find(id uint) (InterfaceEntity, error) {
 	item := reflect.New(reflect.TypeOf(c.GetModel()).Elem()).Interface()
 	err := c.db.First(item, id).Error
 	return item, err
@@ -179,8 +177,8 @@ func (c CrudRepository) PluckBy(fieldNames []string) (map[string]int64, error) {
 	return res, err
 }
 
-func (c CrudRepository) ListAll() ([]entity.InterfaceEntity, error) {
-	entities := make([]entity.InterfaceEntity, 0)
+func (c CrudRepository) ListAll() ([]InterfaceEntity, error) {
+	entities := make([]InterfaceEntity, 0)
 
 	page := 0
 	pageSize := 10000
@@ -212,12 +210,12 @@ func (c CrudRepository) ListAll() ([]entity.InterfaceEntity, error) {
 	return entities, nil
 }
 
-func (c CrudRepository) List(parameters ListParametersInterface) ([]entity.InterfaceEntity, error) {
+func (c CrudRepository) List(parameters ListParametersInterface) ([]InterfaceEntity, error) {
 
 	items := reflect.New(reflect.SliceOf(reflect.TypeOf(c.GetModel()).Elem())).Interface()
 	query, err := c.listQueryBuilder.ListQuery(parameters)
 	if err != nil {
-		return []entity.InterfaceEntity{}, err
+		return []InterfaceEntity{}, err
 	}
 
 	err = query.Find(items).Error
@@ -225,7 +223,7 @@ func (c CrudRepository) List(parameters ListParametersInterface) ([]entity.Inter
 	entities := reflect.ValueOf(items).Elem().Interface()
 
 	// Convert entities to slice
-	var data []entity.InterfaceEntity
+	var data []InterfaceEntity
 	sliceValue := reflect.ValueOf(entities)
 	for i := 0; i < sliceValue.Len(); i++ {
 		data = append(data, sliceValue.Index(i).Interface())
@@ -234,7 +232,7 @@ func (c CrudRepository) List(parameters ListParametersInterface) ([]entity.Inter
 	return data, err
 }
 
-func (c CrudRepository) Create(item entity.InterfaceEntity) entity.InterfaceEntity {
+func (c CrudRepository) Create(item InterfaceEntity) InterfaceEntity {
 	c.db.Create(item)
 	return item
 }
@@ -251,7 +249,7 @@ func (c CrudRepository) prepareTime(val time.Time) string {
 
 // CreateOrUpdateMany create or update if exists
 func (c CrudRepository) CreateOrUpdateMany(
-	item entity.InterfaceEntity,
+	item InterfaceEntity,
 	columns []string,
 	values []map[string]interface{},
 	onConflict string,
@@ -302,7 +300,7 @@ func (c CrudRepository) CreateOrUpdateMany(
 	return c.db.Exec(query).Error
 }
 
-func (c CrudRepository) Update(item entity.InterfaceEntity) entity.InterfaceEntity {
+func (c CrudRepository) Update(item InterfaceEntity) InterfaceEntity {
 	c.db.Save(item)
 	return item
 }
