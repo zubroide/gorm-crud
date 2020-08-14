@@ -12,7 +12,7 @@ type CrudServiceInterface interface {
 
 type CrudService struct {
 	*BaseService
-	repository CrudRepositoryInterface
+	Repository CrudRepositoryInterface
 }
 
 func NewCrudService(repository CrudRepositoryInterface, logger LoggerInterface) CrudServiceInterface {
@@ -21,25 +21,25 @@ func NewCrudService(repository CrudRepositoryInterface, logger LoggerInterface) 
 }
 
 func (c CrudService) GetModel() InterfaceEntity {
-	return c.repository.GetModel()
+	return c.Repository.GetModel()
 }
 
 func (c CrudService) GetItem(id uint) (InterfaceEntity, error) {
-	return c.repository.Find(id)
+	return c.Repository.Find(id)
 }
 
 func (c CrudService) GetList(parameters ListParametersInterface) ([]InterfaceEntity, error) {
-	return c.repository.List(parameters)
+	return c.Repository.List(parameters)
 }
 
 func (c CrudService) Create(item InterfaceEntity) InterfaceEntity {
-	return c.repository.Create(item)
+	return c.Repository.Create(item)
 }
 
 func (c CrudService) Update(item InterfaceEntity) InterfaceEntity {
-	return c.repository.Update(item)
+	return c.Repository.Update(item)
 }
 
 func (c CrudService) Delete(id uint) error {
-	return c.repository.Delete(id)
+	return c.Repository.Delete(id)
 }

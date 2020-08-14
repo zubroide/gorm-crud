@@ -30,21 +30,21 @@ type ListQueryBuilderInterface interface {
 }
 
 type BaseListQueryBuilder struct {
-	db     *gorm.DB
-	logger LoggerInterface
+	Db     *gorm.DB
+	Logger LoggerInterface
 	ListQueryBuilderInterface
 }
 
 func NewBaseListQueryBuilder(db *gorm.DB, logger LoggerInterface) ListQueryBuilderInterface {
-	return &BaseListQueryBuilder{db: db, logger: logger}
+	return &BaseListQueryBuilder{Db: db, Logger: logger}
 }
 
 func (c BaseListQueryBuilder) paginationQuery(parameters ListParametersInterface) *gorm.DB {
-	query := c.db
+	query := c.Db
 
 	val := reflect.ValueOf(parameters).Elem()
 	if val.Kind() != reflect.Struct {
-		c.logger.Error("Unexpected type of parameters for paginationQuery")
+		c.Logger.Error("Unexpected type of parameters for paginationQuery")
 		return query
 	}
 
@@ -56,7 +56,7 @@ func (c BaseListQueryBuilder) paginationQuery(parameters ListParametersInterface
 	if hasPaginationParams {
 		pageValue := val.FieldByName("Page")
 		if !pageValue.IsValid() || pageValue.Kind() != reflect.Int {
-			c.logger.Error("Page is not specified correctly in listQuery")
+			c.Logger.Error("Page is not specified correctly in listQuery")
 		} else {
 			page = pageValue.Int()
 		}
@@ -67,7 +67,7 @@ func (c BaseListQueryBuilder) paginationQuery(parameters ListParametersInterface
 	if hasPaginationParams {
 		pageSizeValue := val.FieldByName("PageSize")
 		if !pageSizeValue.IsValid() || pageSizeValue.Kind() != reflect.Int {
-			c.logger.Error("PageSize is not specified in listQuery")
+			c.Logger.Error("PageSize is not specified in listQuery")
 		} else {
 			pageSize = pageSizeValue.Int()
 		}
@@ -124,26 +124,26 @@ type CrudRepositoryInterface interface {
 type CrudRepository struct {
 	CrudRepositoryInterface
 	*BaseRepository
-	model            InterfaceEntity // Dynamic typing
-	listQueryBuilder ListQueryBuilderInterface
+	Model            InterfaceEntity // Dynamic typing
+	ListQueryBuilder ListQueryBuilderInterface
 }
 
 func NewCrudRepository(db *gorm.DB, model InterfaceEntity, listQueryBuilder ListQueryBuilderInterface, logger LoggerInterface) CrudRepositoryInterface {
 	repo := NewBaseRepository(db, logger).(*BaseRepository)
 	return &CrudRepository{
 		BaseRepository:   repo,
-		model:            model,
-		listQueryBuilder: listQueryBuilder,
+		Model:            model,
+		ListQueryBuilder: listQueryBuilder,
 	}
 }
 
 func (c CrudRepository) GetModel() InterfaceEntity {
-	return c.model
+	return c.Model
 }
 
 func (c CrudRepository) Find(id uint) (InterfaceEntity, error) {
 	item := reflect.New(reflect.TypeOf(c.GetModel()).Elem()).Interface()
-	err := c.db.First(item, id).Error
+	err := c.Db.First(item, id).Error
 	return item, err
 }
 
@@ -213,7 +213,7 @@ func (c CrudRepository) ListAll() ([]InterfaceEntity, error) {
 func (c CrudRepository) List(parameters ListParametersInterface) ([]InterfaceEntity, error) {
 
 	items := reflect.New(reflect.SliceOf(reflect.TypeOf(c.GetModel()).Elem())).Interface()
-	query, err := c.listQueryBuilder.ListQuery(parameters)
+	query, err := c.ListQueryBuilder.ListQuery(parameters)
 	if err != nil {
 		return []InterfaceEntity{}, err
 	}
@@ -233,7 +233,7 @@ func (c CrudRepository) List(parameters ListParametersInterface) ([]InterfaceEnt
 }
 
 func (c CrudRepository) Create(item InterfaceEntity) InterfaceEntity {
-	c.db.Create(item)
+	c.Db.Create(item)
 	return item
 }
 
@@ -292,16 +292,16 @@ func (c CrudRepository) CreateOrUpdateMany(
 	}
 
 	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES %s %s",
-		c.db.NewScope(item).TableName(),
+		c.Db.NewScope(item).TableName(),
 		strings.Join(columns, ","),
 		strings.Join(valueStrings, ","),
 		onConflict)
 
-	return c.db.Exec(query).Error
+	return c.Db.Exec(query).Error
 }
 
 func (c CrudRepository) Update(item InterfaceEntity) InterfaceEntity {
-	c.db.Save(item)
+	c.Db.Save(item)
 	return item
 }
 
@@ -310,6 +310,6 @@ func (c CrudRepository) Delete(id uint) error {
 	if err != nil {
 		return err
 	}
-	c.db.Delete(item)
+	c.Db.Delete(item)
 	return nil
 }

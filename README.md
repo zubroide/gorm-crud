@@ -9,6 +9,8 @@
 
 ## How to use
 
+https://github.com/zubroide/go-api-boilerplate
+
 ```go
 package gin_crud
 

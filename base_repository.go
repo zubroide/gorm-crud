@@ -9,10 +9,10 @@ type BaseRepositoryInterface interface {
 
 type BaseRepository struct {
 	BaseRepositoryInterface
-	db     *gorm.DB
-	logger LoggerInterface
+	Db     *gorm.DB
+	Logger LoggerInterface
 }
 
 func NewBaseRepository(db *gorm.DB, logger LoggerInterface) BaseRepositoryInterface {
-	return &BaseRepository{db: db, logger: logger}
+	return &BaseRepository{Db: db, Logger: logger}
 }

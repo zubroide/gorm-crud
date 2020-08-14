@@ -5,10 +5,10 @@ type BaseServiceInterface interface {
 
 type BaseService struct {
 	BaseServiceInterface
-	repository BaseRepositoryInterface
-	logger     LoggerInterface
+	Repository BaseRepositoryInterface
+	Logger     LoggerInterface
 }
 
 func NewBaseService(repository BaseRepositoryInterface, logger LoggerInterface) *BaseService {
-	return &BaseService{repository: repository, logger: logger}
+	return &BaseService{Repository: repository, Logger: logger}
 }
