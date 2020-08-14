@@ -13,6 +13,6 @@ type BaseRepository struct {
 	Logger LoggerInterface
 }
 
-func NewBaseRepository(db *gorm.DB, logger LoggerInterface) BaseRepositoryInterface {
+func NewBaseRepository(db *gorm.DB, logger LoggerInterface) *BaseRepository {
 	return &BaseRepository{Db: db, Logger: logger}
 }

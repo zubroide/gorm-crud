@@ -15,7 +15,7 @@ type CrudService struct {
 	Repository CrudRepositoryInterface
 }
 
-func NewCrudService(repository CrudRepositoryInterface, logger LoggerInterface) CrudServiceInterface {
+func NewCrudService(repository CrudRepositoryInterface, logger LoggerInterface) *CrudService {
 	service := NewBaseService(repository, logger)
 	return &CrudService{service, repository}
 }

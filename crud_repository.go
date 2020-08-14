@@ -35,7 +35,7 @@ type BaseListQueryBuilder struct {
 	ListQueryBuilderInterface
 }
 
-func NewBaseListQueryBuilder(db *gorm.DB, logger LoggerInterface) ListQueryBuilderInterface {
+func NewBaseListQueryBuilder(db *gorm.DB, logger LoggerInterface) *BaseListQueryBuilder {
 	return &BaseListQueryBuilder{Db: db, Logger: logger}
 }
 
@@ -128,8 +128,8 @@ type CrudRepository struct {
 	ListQueryBuilder ListQueryBuilderInterface
 }
 
-func NewCrudRepository(db *gorm.DB, model InterfaceEntity, listQueryBuilder ListQueryBuilderInterface, logger LoggerInterface) CrudRepositoryInterface {
-	repo := NewBaseRepository(db, logger).(*BaseRepository)
+func NewCrudRepository(db *gorm.DB, model InterfaceEntity, listQueryBuilder ListQueryBuilderInterface, logger LoggerInterface) *CrudRepository {
+	repo := NewBaseRepository(db, logger)
 	return &CrudRepository{
 		BaseRepository:   repo,
 		Model:            model,
