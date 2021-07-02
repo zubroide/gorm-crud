@@ -271,14 +271,53 @@ func (c CrudRepository) CreateOrUpdateMany(
 
 			// filter column value
 			switch v := colVal.(type) {
+			case sql.NullInt32:
+				if !v.Valid {
+					val = "NULL"
+				} else {
+					val = strconv.FormatInt(int64(v.Int32), 10)
+				}
 			case sql.NullInt64:
 				if !v.Valid {
 					val = "NULL"
 				} else {
 					val = strconv.FormatInt(v.Int64, 10)
 				}
+			case sql.NullFloat64:
+				if !v.Valid {
+					val = "NULL"
+				} else {
+					val = fmt.Sprintf("%g", v.Float64)
+				}
+			case sql.NullBool:
+				if !v.Valid {
+					val = "NULL"
+				} else if v.Bool {
+					val = "TRUE"
+				} else {
+					val = "FALSE"
+				}
+			case sql.NullTime:
+				if !v.Valid {
+					val = "NULL"
+				} else {
+					val = c.prepareTime(v.Time)
+				}
+			case sql.NullString:
+				if !v.Valid {
+					val = "NULL"
+				} else {
+					val = c.quote(v.String)
+				}
 			case time.Time:
 				val = c.prepareTime(colVal.(time.Time))
+			case *time.Time:
+				if !reflect.ValueOf(colVal).IsNil() {
+					t := reflect.ValueOf(colVal).Elem().Interface().(time.Time)
+					val = c.prepareTime(t)
+				} else {
+					val = "NULL"
+				}
 			default:
 				if reflect.TypeOf(colVal).Kind() == reflect.String {
 					val = c.quote(val)
