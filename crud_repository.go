@@ -171,7 +171,7 @@ func (c CrudRepository) PluckBy(fieldNames []string) (map[string]int64, error) {
 
 		pluckKey := strings.Join(values, "_")
 
-		res[pluckKey] = val.FieldByName("ID").Int()
+		res[pluckKey] = Num64(val.FieldByName("ID").Interface())
 	}
 
 	return res, err
@@ -247,6 +247,22 @@ func (c CrudRepository) prepareTime(val time.Time) string {
 	return fmt.Sprintf("'%s'", val.Format("2006-01-02T15:04:05-0700"))
 }
 
+func (c CrudRepository) prepareSliceOfNumbers(values interface{}) string {
+	result := "{}"
+	switch reflect.TypeOf(values).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(values)
+		valuesText := []string{}
+		for i := 0; i < s.Len(); i++ {
+			text := fmt.Sprint(s.Index(i))
+			valuesText = append(valuesText, text)
+		}
+		result = fmt.Sprintf("{%s}", strings.Join(valuesText, ","))
+	}
+
+	return c.quote(result)
+}
+
 // CreateOrUpdateMany create or update if exists
 func (c CrudRepository) CreateOrUpdateMany(
 	item InterfaceEntity,
@@ -318,6 +334,8 @@ func (c CrudRepository) CreateOrUpdateMany(
 				} else {
 					val = "NULL"
 				}
+			case []int64, []int32, []float64, []float32:
+				val = c.prepareSliceOfNumbers(v)
 			default:
 				if reflect.TypeOf(colVal).Kind() == reflect.String {
 					val = c.quote(val)
