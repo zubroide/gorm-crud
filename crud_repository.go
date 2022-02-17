@@ -354,7 +354,15 @@ func (c CrudRepository) CreateOrUpdateMany(
 		strings.Join(valueStrings, ","),
 		onConflict)
 
-	return c.Db.Exec(query).Error
+	err := c.Db.Exec(query).Error
+	// Rollback after error
+	if err != nil {
+		c.Logger.Errorf("Cant execute query: %v", err)
+		if closeErr := c.Db.Rollback(); closeErr != nil {
+			c.Logger.Errorf("Cant close db connection: %v", closeErr)
+		}
+	}
+	return err
 }
 
 func (c CrudRepository) Update(item InterfaceEntity) InterfaceEntity {
