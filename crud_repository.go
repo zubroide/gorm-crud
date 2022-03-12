@@ -355,13 +355,10 @@ func (c CrudRepository) CreateOrUpdateMany(
 		onConflict)
 
 	err := c.Db.Exec(query).Error
-	// Rollback after error
-	if err != nil {
-		c.Logger.Errorf("Cant execute query: %v", err)
-		if closeErr := c.Db.Rollback(); closeErr != nil {
-			c.Logger.Errorf("Cant close db connection: %v", closeErr)
-		}
+	if nil != err {
+		c.Logger.Error(err)
 	}
+
 	return err
 }
 
