@@ -11,6 +11,7 @@ type LoggerInterface interface {
 	Errorf(format string, args ...interface{})
 	Fatal(args ...interface{})
 	Fatalf(format string, args ...interface{})
+	Print(args ...interface{})
 }
 
 func NewLoggerWithMeta(logger LoggerInterface, meta ...interface{}) LoggerInterface {
@@ -60,4 +61,8 @@ func (l *LoggerWithMeta) Fatal(args ...interface{}) {
 
 func (l *LoggerWithMeta) Fatalf(format string, args ...interface{}) {
 	l.logger.Fatalf(format, append(l.meta, args))
+}
+
+func (l *LoggerWithMeta) Print(args ...interface{}) {
+	l.logger.Debug(append(l.meta, args))
 }
