@@ -3,11 +3,12 @@ package gorm_crud
 import (
 	"database/sql"
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type ListParametersInterface interface{}
@@ -334,7 +335,7 @@ func (c CrudRepository) CreateOrUpdateMany(
 				} else {
 					val = "NULL"
 				}
-			case []int64, []int32, []float64, []float32:
+			case []int64, []int32, []uint8, []float64, []float32:
 				val = c.prepareSliceOfNumbers(v)
 			default:
 				if reflect.TypeOf(colVal).Kind() == reflect.String {
