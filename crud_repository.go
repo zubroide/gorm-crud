@@ -45,7 +45,7 @@ func (c BaseListQueryBuilder) paginationQuery(parameters ListParametersInterface
 
 	val := reflect.ValueOf(parameters).Elem()
 	if val.Kind() != reflect.Struct {
-		c.Logger.Error("Unexpected type of parameters for paginationQuery")
+		c.Logger.Error("gorm-crud: Unexpected type of parameters for paginationQuery")
 		return query
 	}
 
@@ -57,7 +57,7 @@ func (c BaseListQueryBuilder) paginationQuery(parameters ListParametersInterface
 	if hasPaginationParams {
 		pageValue := val.FieldByName("Page")
 		if !pageValue.IsValid() || pageValue.Kind() != reflect.Int {
-			c.Logger.Error("Page is not specified correctly in listQuery")
+			c.Logger.Error("gorm-crud: Page is not specified correctly in listQuery")
 		} else {
 			page = pageValue.Int()
 		}
@@ -68,7 +68,7 @@ func (c BaseListQueryBuilder) paginationQuery(parameters ListParametersInterface
 	if hasPaginationParams {
 		pageSizeValue := val.FieldByName("PageSize")
 		if !pageSizeValue.IsValid() || pageSizeValue.Kind() != reflect.Int {
-			c.Logger.Error("PageSize is not specified in listQuery")
+			c.Logger.Error("gorm-crud: PageSize is not specified in listQuery")
 		} else {
 			pageSize = pageSizeValue.Int()
 		}
@@ -357,7 +357,7 @@ func (c CrudRepository) CreateOrUpdateMany(
 
 	err := c.Db.Exec(query).Error
 	if nil != err {
-		c.Logger.Error(err)
+		c.Logger.Error("gorm-crud: Error in the CreateOrUpdateMany(): %v", err)
 	}
 
 	return err
