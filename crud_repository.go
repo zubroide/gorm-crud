@@ -357,7 +357,7 @@ func (c CrudRepository) CreateOrUpdateMany(
 
 	err := c.Db.Exec(query).Error
 	if nil != err {
-		c.Logger.Error("gorm-crud: Error in the CreateOrUpdateMany(): %v", err)
+		c.Logger.Errorf("gorm-crud: Error in the CreateOrUpdateMany(): %v", err)
 	}
 
 	return err
