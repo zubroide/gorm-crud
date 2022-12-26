@@ -4,12 +4,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"gorm.io/gorm/schema"
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type ListParametersInterface interface{}
@@ -77,7 +79,7 @@ func (c BaseListQueryBuilder) paginationQuery(parameters ListParametersInterface
 
 	limit := pageSize
 	offset := page * pageSize
-	query = query.Offset(offset).Limit(limit)
+	query = query.Offset(int(offset)).Limit(int(limit))
 
 	var orderBy string
 	if hasPaginationParams {
@@ -97,9 +99,9 @@ func (c BaseListQueryBuilder) paginationQuery(parameters ListParametersInterface
 
 	if len(orderBy) > 0 {
 		if orderDesc {
-			query = query.Order(fmt.Sprintf("%s DESC", orderBy), true)
+			query = query.Order(fmt.Sprintf("%s DESC", orderBy))
 		} else {
-			query = query.Order(fmt.Sprintf("%s ASC", orderBy), true)
+			query = query.Order(fmt.Sprintf("%s ASC", orderBy))
 		}
 	}
 
@@ -353,8 +355,9 @@ func (c CrudRepository) CreateOrUpdateMany(
 		valueStrings = append(valueStrings, valueString)
 	}
 
+	s, _ := schema.Parse(item, &sync.Map{}, schema.NamingStrategy{})
 	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES %s %s",
-		c.Db.NewScope(item).TableName(),
+		s.Table,
 		strings.Join(columns, ","),
 		strings.Join(valueStrings, ","),
 		onConflict)
