@@ -2,6 +2,7 @@ package gorm_crud
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -281,7 +282,10 @@ func (c CrudRepository) CreateOrUpdateMany(
 		var valueRowString []string
 		for _, column := range columns {
 
-			colVal := valueMap[column]
+			colVal, ok := valueMap[column]
+			if !ok {
+				return errors.New(fmt.Sprintf("CreateOrUpdateMany: value for column %s found", column))
+			}
 
 			// stringify column value
 			val := fmt.Sprintf("%v", colVal)
