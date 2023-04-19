@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/lib/pq"
 	"reflect"
 	"strconv"
 	"strings"
@@ -339,7 +340,7 @@ func (c CrudRepository) CreateOrUpdateMany(
 				} else {
 					val = "NULL"
 				}
-			case []int64, []int32, []uint8, []float64, []float32:
+			case []int64, []int32, []uint8, []float64, []float32, pq.Int64Array, pq.Float64Array:
 				val = c.prepareSliceOfNumbers(v)
 			default:
 				if reflect.TypeOf(colVal).Kind() == reflect.String {
