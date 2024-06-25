@@ -147,7 +147,7 @@ func (c CrudRepository) GetModel() InterfaceEntity {
 func (c CrudRepository) Find(id uint) (InterfaceEntity, error) {
 	item := reflect.New(reflect.TypeOf(c.GetModel()).Elem()).Interface()
 	err := c.Db.First(item, id).Error
-	return item, err
+	return item, NormalizeErr(err)
 }
 
 func (c CrudRepository) PluckBy(fieldNames []string) (map[string]int64, error) {
@@ -232,7 +232,7 @@ func (c CrudRepository) List(parameters ListParametersInterface) ([]InterfaceEnt
 		data = append(data, sliceValue.Index(i).Interface())
 	}
 
-	return data, err
+	return data, NormalizeErr(err)
 }
 
 func (c CrudRepository) Create(item InterfaceEntity) InterfaceEntity {
@@ -361,6 +361,7 @@ func (c CrudRepository) CreateOrUpdateMany(
 		onConflict)
 
 	err := c.Db.Exec(query).Error
+	err = NormalizeErr(err)
 	if nil != err {
 		c.Logger.Errorf("gorm-crud: Error in the CreateOrUpdateMany(): %v", err)
 	}
@@ -375,6 +376,7 @@ func (c CrudRepository) Update(item InterfaceEntity) InterfaceEntity {
 
 func (c CrudRepository) Delete(id uint) error {
 	item, err := c.Find(id)
+	err = NormalizeErr(err)
 	if err != nil {
 		return err
 	}
