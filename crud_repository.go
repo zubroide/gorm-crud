@@ -118,6 +118,7 @@ type CrudRepositoryInterface interface {
 	PluckBy(fieldNames []string) (map[string]int64, error)
 	ListAll() ([]InterfaceEntity, error)
 	List(parameters ListParametersInterface) ([]InterfaceEntity, error)
+	ListCount(parameters ListParametersInterface) (int64, error)
 	Create(item InterfaceEntity) InterfaceEntity
 	CreateOrUpdateMany(item InterfaceEntity, columns []string, values []map[string]interface{}, onConflict string) error
 	Update(item InterfaceEntity) InterfaceEntity
@@ -233,6 +234,17 @@ func (c CrudRepository) List(parameters ListParametersInterface) ([]InterfaceEnt
 	}
 
 	return data, NormalizeErr(err)
+}
+
+func (c CrudRepository) ListCount(parameters ListParametersInterface) (int64, error) {
+	query, err := c.ListQueryBuilder.ListQuery(parameters)
+	if err != nil {
+		return 0, err
+	}
+	var count int64
+	item := reflect.New(reflect.TypeOf(c.GetModel()).Elem()).Interface()
+	err = query.Model(item).Count(&count).Error
+	return count, err
 }
 
 func (c CrudRepository) Create(item InterfaceEntity) InterfaceEntity {
