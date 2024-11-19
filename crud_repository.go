@@ -290,6 +290,8 @@ func (c CrudRepository) CreateOrUpdateMany(
 		return nil
 	}
 
+	tableName := c.Db.NewScope(item).TableName()
+
 	var valueStrings []string
 	for _, valueMap := range values {
 		var valueRowString []string
@@ -297,7 +299,7 @@ func (c CrudRepository) CreateOrUpdateMany(
 
 			colVal, ok := valueMap[column]
 			if !ok {
-				return errors.New(fmt.Sprintf("CreateOrUpdateMany: value for column %s found", column))
+				return errors.New(fmt.Sprintf("CreateOrUpdateMany: value for column %s found, table: %s", column, tableName))
 			}
 
 			// stringify column value
@@ -367,7 +369,7 @@ func (c CrudRepository) CreateOrUpdateMany(
 	}
 
 	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES %s %s",
-		c.Db.NewScope(item).TableName(),
+		tableName,
 		strings.Join(columns, ","),
 		strings.Join(valueStrings, ","),
 		onConflict)
@@ -375,7 +377,7 @@ func (c CrudRepository) CreateOrUpdateMany(
 	err := c.Db.Exec(query).Error
 	err = NormalizeErr(err)
 	if nil != err {
-		c.Logger.Errorf("gorm-crud: Error in the CreateOrUpdateMany(): %v", err)
+		c.Logger.Errorf("gorm-crud: Error in the CreateOrUpdateMany(): %v, table: %s", err, tableName)
 	}
 
 	return err
