@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lib/pq"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/lib/pq"
 
 	"github.com/jinzhu/gorm"
 )
@@ -262,7 +263,7 @@ func (c CrudRepository) prepareTime(val time.Time) string {
 	return fmt.Sprintf("'%s'", val.Format("2006-01-02T15:04:05-0700"))
 }
 
-func (c CrudRepository) prepareSliceOfNumbers(values interface{}) string {
+func (c CrudRepository) prepareSliceValue(values interface{}) string {
 	result := "{}"
 	switch reflect.TypeOf(values).Kind() {
 	case reflect.Slice:
@@ -354,8 +355,8 @@ func (c CrudRepository) CreateOrUpdateMany(
 				} else {
 					val = "NULL"
 				}
-			case []int64, []int32, []uint8, []float64, []float32, pq.Int64Array, pq.Float64Array:
-				val = c.prepareSliceOfNumbers(v)
+			case []int64, []int32, []uint8, []float64, []float32, pq.Int64Array, pq.Float64Array, []string, pq.StringArray:
+				val = c.prepareSliceValue(v)
 			default:
 				if reflect.TypeOf(colVal).Kind() == reflect.String {
 					val = c.quote(val)
